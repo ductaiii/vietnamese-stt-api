@@ -1,55 +1,70 @@
-# Speech-to-Text Transcription with Google Cloud API
+# Speech-to-Text với Google Cloud
 
-This Node.js application demonstrates how to transcribe audio files using the Google Cloud Speech-to-Text API. It reads an audio file, sends it to the API for transcription, and displays the transcribed text.
+<!-- Chừa chỗ cho video demo: đặt máy quay, giới thiệu ngắn, và chạy ví dụ -->
 
-## Prerequisites
+Demo :
 
-Before running this application, you need to have the following:
 
-- [Node.js](https://nodejs.org/) installed on your machine.
-- A Google Cloud Platform (GCP) project with the Speech-to-Text API enabled.
-- A service account key JSON file for authentication. Set the path to this file in the `GOOGLE_APPLICATION_CREDENTIALS` environment variable.
 
-## Installation
+Ứng dụng Node.js này minh họa cách chuyển giọng nói thành chữ (speech-to-text) sử dụng Google Cloud Speech-to-Text API. Ứng dụng đọc một file âm thanh, gửi lên API để nhận kết quả chuyển chữ, và xuất văn bản nhận được.
 
-1. Clone this repository to your local machine:
+**Yêu cầu trước khi chạy**
 
-   ```shell
-   git clone https://github.com/adanzweig/nodejs-googlestt.git
-   cd nodejs-googlestt
-   ```
+- Cài đặt `Node.js` trên máy.
+- Có một project trên Google Cloud Platform (GCP) và đã bật API **Speech-to-Text**.
+- Tạo một Service Account và tải file khóa JSON (service account key). Bạn sẽ dùng file JSON này để xác thực.
 
-2. Install the project dependencies:
+**Lấy file JSON từ Google Cloud (tóm tắt)**
 
-   ```shell
-   npm install
-   ```
+1. Vào Console GCP: https://console.cloud.google.com/
+2. Chọn project của bạn, vào **IAM & Admin → Service Accounts**.
+3. Tạo Service Account mới (nếu chưa có), cấp quyền `Cloud Speech Client` hoặc `Owner` tạm thời cho thử nghiệm.
+4. Tạo khóa (Create Key) kiểu JSON và tải file xuống (ví dụ: `my-gcp-key.json`).
+5. Đổi tên file JSON bạn vừa tải về thành `google-credentials.json` và đặt vào thư mục gốc của dự án (cùng cấp với `index.js`). `index.js` hiện tại mặc định dùng `google-credentials.json`, nên bạn chỉ cần đặt file vào thư mục rồi chạy `node index.js`.
 
-## Usage
+**Cài đặt**
 
-1. Place the audio file you want to transcribe in the project directory. Ensure that the file format is compatible with the Google Cloud Speech-to-Text API.
+1. Clone repo :
 
-2. Modify the `config` object in the `transcribeAudio` function in `index.js` if needed. You may need to adjust the `encoding`, `sampleRateHertz`, and `languageCode` properties to match your audio file.
-
-3. Run the application:
-
-   ```shell
-   node index.js
-   ```
-
-   The application will transcribe the audio and display the transcribed text in the console.
-
-## Example
-
-Here's an example of running the application:
-
-```shell
-$ node index.js
-
-Transcription result:
-This is an example of a transcribed audio file using the Google Cloud Speech-to-Text API.
+```powershell
+git clone https://github.com/ductaiii/vietnamese-stt-api.git
+cd vietnamese-stt-api
 ```
 
-## Troubleshooting
+2. Cài phụ thuộc:
 
-If you encounter any issues or errors while running the application, please refer to the [troubleshooting section](#troubleshooting) in this README or seek assistance on the [Google Cloud Community Forums](https://cloud.google.com/community).
+```powershell
+npm install
+```
+
+**Cách dùng nhanh**
+
+1. Đặt file âm thanh (ví dụ `cuulong.mp3`) vào thư mục dự án.
+2. Trong `index.js`, kiểm tra `config` (các trường `encoding`, `sampleRateHertz`, `languageCode`) sao cho khớp với file âm thanh.
+3. Chạy (dùng file mặc định `cuulong.mp3`):
+
+```powershell
+node index.js
+```
+
+Hoặc chạy với file bất kỳ:
+
+```powershell
+node index.js ten-file-bat-ky.mp3
+```
+
+Ứng dụng sẽ in kết quả chuyển chữ ra console và lưu transcript vào thư mục `transcripts/<ten-file-audio>.txt`.
+
+**Ví dụ đầu ra**
+
+```text
+D:\TongHopProject\nodejs-googlestt>node index.js
+ai ơi ngủ đi xa hãy nhớ kẻ trắng nước trong là Cần Thơ Cửu Long giang ra biển lớn chính dòng thương ai với tôi bằng cả tấm lòng mẹ trẻ con lại các trận
+Đã lưu transcript vào: D:\TongHopProject\nodejs-googlestt\transcripts\cuulong.txt
+```
+
+**Gặp lỗi phổ biến**
+
+- Nếu nhận được lỗi dạng `Specify MP3 encoding to match audio file.` thì chỉnh `config.encoding` thành `MP3` cho file .mp3, hoặc `LINEAR16` cho file WAV 16-bit PCM.
+- Lỗi xác thực: kiểm tra biến `GOOGLE_APPLICATION_CREDENTIALS` trỏ đúng tới file JSON.
+

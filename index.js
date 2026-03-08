@@ -1,52 +1,71 @@
-const speech = require('@google-cloud/speech'); // Import the Google Cloud Speech library.
-const fs = require('fs'); // Import the Node.js filesystem module.
+const speech = require('@google-cloud/speech')
+const fs = require('fs')
+const path = require('path')
 
-process.env.GOOGLE_APPLICATION_CREDENTIALS = 'codingwithado.json'; // Set the path to your Google Cloud service account key.
+process.env.GOOGLE_APPLICATION_CREDENTIALS = 'google-credentials.json' // Đường dẫn tới khóa service account của Google Cloud.
 
 async function transcribeAudio(audioName) {
-    try {
-        // Initialize a SpeechClient from the Google Cloud Speech library.
-        const speechClient = new speech.SpeechClient();
+  try {
+    const speechClient = new speech.SpeechClient()
+    const file = fs.readFileSync(audioName)
+    const audioBytes = file.toString('base64')
+    const audio = { content: audioBytes }
 
-        // Read the binary audio data from the specified file.
-        const file = fs.readFileSync(audioName);
-        const audioBytes = file.toString('base64');
-
-        // Create an 'audio' object with the audio content in base64 format.
-        const audio = {
-            content: audioBytes
-        };
-
-        // Define the configuration for audio encoding, sample rate, and language code.
-        const config = {
-            encoding: 'LINEAR16',   // Audio encoding (change if needed).
-            sampleRateHertz: 44100, // Audio sample rate in Hertz (change if needed).
-            languageCode: 'en-US'   // Language code for the audio (change if needed).
-        };
-
-        // Return a Promise for the transcription result.
-        return new Promise((resolve, reject) => {
-            // Use the SpeechClient to recognize the audio with the specified config.
-            speechClient.recognize({ audio, config })
-                .then(data => {
-                    resolve(data); // Resolve the Promise with the transcription result.
-                })
-                .catch(err => {
-                    reject(err); // Reject the Promise if an error occurs.
-                });
-        });
-    } catch (error) {
-        console.error('Error:', error);
+    // Cấu hình: encoding, sample rate và mã ngôn ngữ.
+    const config = {
+      encoding: 'MP3', // Encoding phù hợp với file voicetest.mp3
+      sampleRateHertz: 44100, // Tần số mẫu (thay nếu cần)
+      languageCode: 'vi-VN' // Mã ngôn ngữ (ví dụ: 'vi-VN' hoặc 'en-US')
     }
+
+    return new Promise((resolve, reject) => {
+      speechClient
+        .recognize({ audio, config })
+        .then((data) => {
+          resolve(data)
+        })
+        .catch((err) => {
+          reject(err)
+        })
+    })
+  } catch (error) {
+    console.error('Lỗi:', error)
+  }
 }
 
-(async () => {
-    // Call the transcribeAudio function to transcribe 'output.mp3'.
-    const text = await transcribeAudio('output.mp3');
+;(async () => {
+  // Nhận tên file từ command line, nếu không có thì dùng file mặc định.
+  const audioFile = process.argv[2] || 'cuulong.mp3'
 
-    // Log the entire response object (for debugging purposes).
-    console.log(text);
+  if (!fs.existsSync(audioFile)) {
+    console.error(`Không tìm thấy file audio: ${audioFile}`)
+    console.error('Cách dùng: node index.js <ten-file.mp3>')
+    process.exit(1)
+  }
 
-    // Extract and log the transcribed text from the response.
-    console.log(text[0].results.map(r => r.alternatives[0].transcript).join("\n"));
-})();
+  // Gọi hàm chuyển chữ cho file mp3
+  const response = await transcribeAudio(audioFile)
+
+  //   console.log(response)
+
+  // Lấy chuỗi transcript từ response
+  const transcript =
+    response && response[0] && response[0].results
+      ? response[0].results.map((r) => r.alternatives[0].transcript).join('\n')
+      : ''
+
+  // In transcript ra console.
+  console.log(transcript)
+
+  // Tạo thư mục lưu kết quả nếu chưa tồn tại và ghi file .txt.
+  const outDir = path.join(__dirname, 'transcripts')
+  fs.mkdirSync(outDir, { recursive: true })
+  const outFileName = `${path.parse(audioFile).name}.txt`
+  const outPath = path.join(outDir, outFileName)
+  try {
+    fs.writeFileSync(outPath, transcript, 'utf8')
+    console.log('Đã lưu transcript vào:', outPath)
+  } catch (err) {
+    console.error('Không thể ghi file transcript:', err)
+  }
+})()
