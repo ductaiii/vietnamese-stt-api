@@ -4,6 +4,7 @@
 
 Demo :
 
+https://github.com/user-attachments/assets/fbfb26e7-a75c-437e-af13-b9820fe4441b
 
 
 Ứng dụng Node.js này minh họa cách chuyển giọng nói thành chữ (speech-to-text) sử dụng Google Cloud Speech-to-Text API. Ứng dụng đọc một file âm thanh, gửi lên API để nhận kết quả chuyển chữ, và xuất văn bản nhận được.
